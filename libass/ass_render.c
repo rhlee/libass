@@ -1314,7 +1314,6 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
         return;
 
     val = ass_cache_get(render_priv->cache.bitmap_cache, &info->hash_key);
-    val = 0;
 
     if (!val) {
         FT_Vector shift;
@@ -2167,6 +2166,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     }
 
     FT_Outline *background;
+    int h_padding = 500;
     for (i = 0; i < text_info->length; ++i) {
         GlyphInfo *info = glyphs + i;
         if(!i || info->linebreak)
@@ -2177,7 +2177,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
           if(background->n_points == 4)
           {
             ass_msg(render_priv->library, MSGL_WARN, "4points found");
-            background->points[0].y =- 1000;
+            background->points[0].x =- h_padding;
+            background->points[3].x =- h_padding;
           }
         } else if((text_info->length - i == 1) ||
           ((text_info->length - i > 2) && (info + 2)->linebreak))
