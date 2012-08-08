@@ -700,6 +700,40 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
 
     for (i = 0; i < text_info->length; ++i) {
         GlyphInfo *info = text_info->glyphs + i;
+        if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_b
+            || info->skip)
+            continue;
+
+        while (info) {
+            if (!info->bm_b) {
+                info = info->next;
+                continue;
+            }
+
+            pen_x = dst_x + (info->pos.x >> 6);
+            pen_y = dst_y + (info->pos.y >> 6);
+            bm = info->bm_b;
+
+            if ((info->effect_type == EF_KARAOKE_KO)
+                    && (info->effect_timing <= (info->bbox.xMax >> 6))) {
+                // do nothing
+            } else {
+                here_tail = tail;
+                tail =
+                    render_glyph(render_priv, bm, pen_x, pen_y, info->c[4],
+                            0, 1000000, tail);
+                if (last_tail && tail != here_tail && ((info->c[4] & 0xff) > 0))
+                    render_overlap(render_priv, last_tail, here_tail);
+
+                last_tail = here_tail;
+            }
+            info = info->next;
+        }
+    }
+
+    last_tail = 0;
+    for (i = 0; i < text_info->length; ++i) {
+        GlyphInfo *info = text_info->glyphs + i;
         if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_s
             || (info->shadow_x == 0 && info->shadow_y == 0) || info->skip)
             continue;
@@ -848,6 +882,7 @@ void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style)
     render_priv->state.c[1] = style->SecondaryColour;
     render_priv->state.c[2] = style->OutlineColour;
     render_priv->state.c[3] = style->BackColour;
+    render_priv->state.c[4] = style->BackgroundColour;
     render_priv->state.flags =
         (style->Underline ? DECO_UNDERLINE : 0) |
         (style->StrikeOut ? DECO_STRIKETHROUGH : 0);
@@ -1278,19 +1313,21 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
         return;
 
     val = ass_cache_get(render_priv->cache.bitmap_cache, &info->hash_key);
+    val = 0;
 
     if (!val) {
         FT_Vector shift;
         BitmapHashValue hash_val;
         int error;
         double fax_scaled, fay_scaled;
-        FT_Outline *outline, *border;
+        FT_Outline *outline, *border, *background;
         double scale_x = render_priv->font_scale_x;
 
         hash_val.bm = hash_val.bm_o = hash_val.bm_s = 0;
 
         outline_copy(render_priv->ftlibrary, info->outline, &outline);
         outline_copy(render_priv->ftlibrary, info->border, &border);
+        outline_copy(render_priv->ftlibrary, info->background, &background);
 
         // calculating rotation shift vector (from rotation origin to the glyph basepoint)
         shift.x = key->shift_x;
@@ -1329,6 +1366,10 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
                 info->blur * render_priv->border_scale,
                 key->shadow_offset,
                 render_priv->state.style->BorderStyle);
+        if (background)
+          hash_val.bm_b = outline_to_bitmap(render_priv->library,
+            render_priv->ftlibrary, background, 1);
+        if (!background) error++;
         if (error)
             info->symbol = 0;
 
@@ -1342,6 +1383,7 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
     info->bm = val->bm;
     info->bm_o = val->bm_o;
     info->bm_s = val->bm_s;
+    info->bm_b = val->bm_b;
 
     // VSFilter compatibility: invisible fill and no border?
     // In this case no shadow is supposed to be rendered.
@@ -1727,8 +1769,9 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     num_glyphs = 0;
     p = event->Text;
     
-    render_priv->state.style->BackgroundColour = 0x88888888;
-
+    render_priv->state.c[4] = render_priv->state.style->BackgroundColour =
+      0xff888888;
+    
     // Event parsing.
     while (1) {
         // get next char, executing style override
@@ -1773,7 +1816,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         // Fill glyph information
         glyphs[text_info->length].symbol = code;
         glyphs[text_info->length].font = render_priv->state.font;
-        for (i = 0; i < 4; ++i) {
+        for (i = 0; i < 5; ++i) {
             uint32_t clr = render_priv->state.c[i];
             change_alpha(&clr,
                          mult_alpha(_a(clr), render_priv->state.fade), 1.);
@@ -2122,11 +2165,19 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
+    FT_Outline *background;
     for (i = 0; i < text_info->length; ++i) {
         GlyphInfo *info = glyphs + i;
         if(!i || info->linebreak)
         {
           ass_msg(render_priv->library, MSGL_WARN, "start: %c", (char)info->symbol);
+          background = info->background;
+          ass_msg(render_priv->library, MSGL_WARN, "%i points", background->n_points);
+          if(background->n_points == 4)
+          {
+            ass_msg(render_priv->library, MSGL_WARN, "4points found");
+            background->points[0].y =- 1000;
+          }
         } else if((text_info->length - i == 1) ||
           ((text_info->length - i > 2) && (info + 2)->linebreak))
         {
@@ -2139,7 +2190,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     int left = render_priv->settings.left_margin;
     device_x = (device_x - left) * render_priv->font_scale_x + left;
     for (i = 0; i < text_info->length; ++i) {
-        GlyphInfo *info = glyphs + i;
+       GlyphInfo *info = glyphs + i;
         while (info) {
             OutlineBitmapHashKey *key = &info->hash_key.u.outline;
             info->pos.x *= render_priv->font_scale_x;

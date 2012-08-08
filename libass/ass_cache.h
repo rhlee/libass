@@ -32,6 +32,7 @@ typedef struct {
     Bitmap *bm;               // the actual bitmaps
     Bitmap *bm_o;
     Bitmap *bm_s;
+    Bitmap *bm_b;
 } BitmapHashValue;
 
 typedef struct {
