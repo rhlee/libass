@@ -1196,7 +1196,9 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
             else
                 advance = info->advance;
 
-            draw_opaque_box(priv, v.asc, v.desc, v.background, advance,
+            // Place the background outline outside the cache
+            // so that the background outline can be modified later
+            draw_opaque_box(priv, v.asc, v.desc, info->background, advance,
                     double_to_d6(info->border_x * priv->border_scale),
                     double_to_d6(info->border_y * priv->border_scale));
         }
@@ -1208,7 +1210,6 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
     info->hash_key.u.outline.outline = val;
     info->outline = val->outline;
     info->border = val->border;
-    info->background = val->background;
     info->bbox = val->bbox_scaled;
     if (info->drawing || priv->settings.shaper == ASS_SHAPING_SIMPLE) {
         info->cluster_advance.x = info->advance.x = val->advance.x;
