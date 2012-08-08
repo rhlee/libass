@@ -110,9 +110,11 @@ typedef struct glyph_info {
     ASS_Drawing *drawing;
     FT_Outline *outline;
     FT_Outline *border;
+    FT_Outline *background;
     Bitmap *bm;                 // glyph bitmap
     Bitmap *bm_o;               // outline bitmap
     Bitmap *bm_s;               // shadow bitmap
+    Bitmap *bm_b;               // background bitmap
     FT_BBox bbox;
     FT_Vector pos;
     FT_Vector offset;

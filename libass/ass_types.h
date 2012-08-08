@@ -43,6 +43,7 @@ typedef struct ass_style {
     uint32_t SecondaryColour;
     uint32_t OutlineColour;
     uint32_t BackColour;
+    uint32_t BackgroundColour;
     int Bold;
     int Italic;
     int Underline;
