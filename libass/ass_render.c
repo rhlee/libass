@@ -2122,6 +2122,19 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
+    for (i = 0; i < text_info->length; ++i) {
+        GlyphInfo *info = glyphs + i;
+        if(!i || info->linebreak)
+        {
+          ass_msg(render_priv->library, MSGL_WARN, "start: %c", (char)info->symbol);
+        } else if((text_info->length - i == 1) ||
+          ((text_info->length - i > 2) && (info + 2)->linebreak))
+        {
+          ass_msg(render_priv->library, MSGL_WARN, "last: %c", (char)info->symbol);
+        }
+    }
+
+
     // convert glyphs to bitmaps
     int left = render_priv->settings.left_margin;
     device_x = (device_x - left) * render_priv->font_scale_x + left;
