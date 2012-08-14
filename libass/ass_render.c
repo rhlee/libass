@@ -1355,6 +1355,11 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
                 FT_Outline_Transform(border, &m);
             FT_Outline_Translate(border, key->advance.x, -key->advance.y);
         }
+        if (background) {
+            if (scale_x != 1.0)
+                FT_Outline_Transform(background, &m);
+            FT_Outline_Translate(background, key->advance.x, -key->advance.y);
+        }
 
         // render glyph
         error = outline_to_bitmap3(render_priv->library,
