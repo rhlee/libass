@@ -973,7 +973,7 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     double scale_x = render_priv->state.scale_x;
 
     // to avoid gaps
-    // 
+    // Had to reduce from 64 to 8 to prevent overlaps
     sx = FFMAX(8, sx);
     sy = FFMAX(8, sy);
 
@@ -1185,7 +1185,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
                     double_to_d6(info->border_x * priv->border_scale),
                     double_to_d6(info->border_y * priv->border_scale));
         }
-        
+
         v.lib = priv->ftlibrary;
         val = ass_cache_put(priv->cache.outline_cache, &key, &v);
     }
@@ -2207,7 +2207,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     int left = render_priv->settings.left_margin;
     device_x = (device_x - left) * render_priv->font_scale_x + left;
     for (i = 0; i < text_info->length; ++i) {
-       GlyphInfo *info = glyphs + i;
+        GlyphInfo *info = glyphs + i;
         while (info) {
             OutlineBitmapHashKey *key = &info->hash_key.u.outline;
             info->pos.x *= render_priv->font_scale_x;
