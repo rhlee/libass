@@ -973,8 +973,9 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     double scale_x = render_priv->state.scale_x;
 
     // to avoid gaps
-    sx = FFMAX(64, sx);
-    sy = FFMAX(64, sy);
+    // 
+    sx = FFMAX(8, sx);
+    sy = FFMAX(8, sy);
 
     // Emulate the WTFish behavior of VSFilter, i.e. double-scale
     // the sizes of the opaque box.
