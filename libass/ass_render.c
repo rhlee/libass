@@ -1372,9 +1372,11 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
                 key->shadow_offset,
                 render_priv->state.style->BorderStyle);
         if (background)
+        {
           hash_val.bm_b = outline_to_bitmap(render_priv->library,
             render_priv->ftlibrary, background, 1);
-        if (!background) error++;
+          if (!hash_val.bm_b) error++;
+        }
         if (error)
             info->symbol = 0;
 
