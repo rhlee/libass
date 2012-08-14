@@ -2173,31 +2173,25 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     }
 
     FT_Outline *background;
-    int h_padding = 500;
     for (i = 0; i < text_info->length; ++i) {
         GlyphInfo *info = glyphs + i;
         background = info->background;
         if(!i || info->linebreak)
         {
-          ass_msg(render_priv->library, MSGL_WARN, "start: %c", (char)info->symbol);
-          ass_msg(render_priv->library, MSGL_WARN, "%i points", background->n_points);
           if(background->n_points == 4)
           {
-            ass_msg(render_priv->library, MSGL_WARN, "4points found");
-            background->points[0].x -= h_padding;
-            background->points[3].x -= h_padding;
+            background->points[0].x -= BACKGROUND_PADDING;
+            background->points[3].x -= BACKGROUND_PADDING;
             // Make cache dirty
             memset(&info->hash_key, 0, sizeof(BitmapHashKey));
           }
         } else if((text_info->length - i == 1) ||
           ((text_info->length - i > 2) && (info + 2)->linebreak))
         {
-          ass_msg(render_priv->library, MSGL_WARN, "last: %c", (char)info->symbol);
           if(background->n_points == 4)
           {
-            ass_msg(render_priv->library, MSGL_WARN, "4points found");
-            background->points[1].x += h_padding;
-            background->points[2].x += h_padding;
+            background->points[1].x += BACKGROUND_PADDING;
+            background->points[2].x += BACKGROUND_PADDING;
             // Make cache dirty
             memset(&info->hash_key, 0, sizeof(BitmapHashKey));
           }
