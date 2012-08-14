@@ -1203,8 +1203,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
             advance = info->advance;
 
         draw_opaque_box(priv, val->asc, val->desc, info->background, advance,
-                double_to_d6(info->border_x * priv->border_scale),
-                double_to_d6(info->border_y * priv->border_scale));
+          0, 0);
     }
 
     info->hash_key.u.outline.outline = val;
