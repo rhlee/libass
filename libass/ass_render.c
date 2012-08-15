@@ -1323,7 +1323,7 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
         FT_Outline *outline, *border, *background;
         double scale_x = render_priv->font_scale_x;
 
-        hash_val.bm = hash_val.bm_o = hash_val.bm_s = 0;
+        hash_val.bm = hash_val.bm_o = hash_val.bm_s = hash_val.bm_b = 0;
 
         outline_copy(render_priv->ftlibrary, info->outline, &outline);
         outline_copy(render_priv->ftlibrary, info->border, &border);
