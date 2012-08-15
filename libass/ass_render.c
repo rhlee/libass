@@ -1385,6 +1385,7 @@ get_bitmap_glyph(ASS_Renderer *render_priv, GlyphInfo *info)
 
         outline_free(render_priv->ftlibrary, outline);
         outline_free(render_priv->ftlibrary, border);
+        outline_free(render_priv->ftlibrary, background);
     }
 
     info->bm = val->bm;
