@@ -1777,7 +1777,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     p = event->Text;
     
     render_priv->state.c[4] = render_priv->state.style->BackgroundColour =
-      0xff888888;
+      0x0;
     
     // Event parsing.
     while (1) {
@@ -2172,29 +2172,32 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
-    FT_Outline *background;
-    for (i = 0; i < text_info->length; ++i) {
-        GlyphInfo *info = glyphs + i;
-        background = info->background;
-        if(!i || info->linebreak)
-        {
-          if(background->n_points == 4)
-          {
-            background->points[0].x -= BACKGROUND_PADDING;
-            background->points[3].x -= BACKGROUND_PADDING;
-            // Make cache dirty
-            memset(&info->hash_key, 0, sizeof(BitmapHashKey));
-          }
-        } else if((text_info->length - i == 1) ||
-          ((text_info->length - i > 2) && (info + 2)->linebreak))
-        {
-          if(background->n_points == 4)
-          {
-            background->points[1].x += BACKGROUND_PADDING;
-            background->points[2].x += BACKGROUND_PADDING;
-            // Make cache dirty
-            memset(&info->hash_key, 0, sizeof(BitmapHashKey));
-          }
+    if(render_priv->state.c[4])
+    {
+        FT_Outline *background;
+        for (i = 0; i < text_info->length; ++i) {
+            GlyphInfo *info = glyphs + i;
+            background = info->background;
+            if(!i || info->linebreak)
+            {
+              if(background->n_points == 4)
+              {
+                background->points[0].x -= BACKGROUND_PADDING;
+                background->points[3].x -= BACKGROUND_PADDING;
+                // Make cache dirty
+                memset(&info->hash_key, 0, sizeof(BitmapHashKey));
+              }
+            } else if((text_info->length - i == 1) ||
+              ((text_info->length - i > 2) && (info + 2)->linebreak))
+            {
+              if(background->n_points == 4)
+              {
+                background->points[1].x += BACKGROUND_PADDING;
+                background->points[2].x += BACKGROUND_PADDING;
+                // Make cache dirty
+                memset(&info->hash_key, 0, sizeof(BitmapHashKey));
+              }
+            }
         }
     }
 
