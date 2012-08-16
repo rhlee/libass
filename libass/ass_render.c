@@ -2182,8 +2182,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
               {
                 background->points[0].x -= BACKGROUND_PADDING;
                 background->points[3].x -= BACKGROUND_PADDING;
-                // Make cache dirty
-                memset(&info->hash_key, 0, sizeof(BitmapHashKey));
+                // If the glyph is at the start of a line, change the cache key
+                info->hash_key.u.outline.end = GLYPH_START;
               }
             } else if((text_info->length - i == 1) ||
               ((text_info->length - i > 2) && (info + 2)->linebreak))
@@ -2192,8 +2192,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
               {
                 background->points[1].x += BACKGROUND_PADDING;
                 background->points[2].x += BACKGROUND_PADDING;
-                // Make cache dirty
-                memset(&info->hash_key, 0, sizeof(BitmapHashKey));
+                // If the glyph is at the end of a line, change the cache key
+                info->hash_key.u.outline.end = GLYPH_END;
               }
             }
         }

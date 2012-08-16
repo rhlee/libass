@@ -76,6 +76,9 @@ START(outline_bitmap, outline_bitmap_hash_key)
     GENERIC(int, shift_y)
     FTVECTOR(advance) // subpixel shift vector
     FTVECTOR(shadow_offset) // shadow subpixel shift
+    // end is used to indicate if the cached bitmap is for a glyph
+    // at the start or the end of line (used with BackgroundColour)
+    GENERIC(int, end)
 END(OutlineBitmapHashKey)
 
 // describe a clip mask bitmap
