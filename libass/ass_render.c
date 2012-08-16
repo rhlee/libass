@@ -1776,10 +1776,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     text_info->length = 0;
     num_glyphs = 0;
     p = event->Text;
-    
-    render_priv->state.c[4] = render_priv->state.style->BackgroundColour =
-      0x0;
-    
+
     // Event parsing.
     while (1) {
         // get next char, executing style override

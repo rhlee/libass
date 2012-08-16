@@ -180,6 +180,7 @@ static void set_default_style(ASS_Style *style)
     style->SecondaryColour  = 0x00ffff00;
     style->OutlineColour    = 0x00000000;
     style->BackColour       = 0x00000080;
+    style->BackgroundColour = 0x00000000;
     style->Bold             = 200;
     style->ScaleX           = 1.0;
     style->ScaleY           = 1.0;
@@ -407,6 +408,7 @@ void ass_process_force_style(ASS_Track *track)
                     COLORVAL(SecondaryColour)
                     COLORVAL(OutlineColour)
                     COLORVAL(BackColour)
+                    COLORVAL(BackgroundColour)
                     FPVAL(FontSize)
                     INTVAL(Bold)
                     INTVAL(Italic)
@@ -504,6 +506,7 @@ static int process_style(ASS_Track *track, char *str)
             COLORVAL(SecondaryColour)
             COLORVAL(OutlineColour) // TertiaryColor
             COLORVAL(BackColour)
+            COLORVAL(BackgroundColour)
             // SSA uses BackColour for both outline and shadow
             // this will destroy SSA's TertiaryColour, but i'm not going to use it anyway
             if (track->track_type == TRACK_TYPE_SSA)
