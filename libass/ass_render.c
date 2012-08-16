@@ -1186,30 +1186,28 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
                     double_to_d6(info->border_y * priv->border_scale));
         }
 
+        if(priv->state.c[4])
+        {
+            FT_Vector advance;
+
+            v.background = calloc(1, sizeof(FT_Outline));
+
+            if (priv->settings.shaper == ASS_SHAPING_SIMPLE || info->drawing)
+                advance = v.advance;
+            else
+                advance = info->advance;
+
+            draw_opaque_box(priv, v.asc, v.desc, v.background, advance, 0, 0);
+        }
+
         v.lib = priv->ftlibrary;
         val = ass_cache_put(priv->cache.outline_cache, &key, &v);
-    }
-
-   // Place the background outline outside the cache
-   // so that the background outline can be modified later
-   if(priv->state.style->BackgroundColour)
-    {
-        FT_Vector advance;
-
-        info->background = calloc(1, sizeof(FT_Outline));
-
-        if (priv->settings.shaper == ASS_SHAPING_SIMPLE || info->drawing)
-            advance = val->advance;
-        else
-            advance = info->advance;
-
-        draw_opaque_box(priv, val->asc, val->desc, info->background, advance,
-          0, 0);
     }
 
     info->hash_key.u.outline.outline = val;
     info->outline = val->outline;
     info->border = val->border;
+    info->background = val->background;
     info->bbox = val->bbox_scaled;
     if (info->drawing || priv->settings.shaper == ASS_SHAPING_SIMPLE) {
         info->cluster_advance.x = info->advance.x = val->advance.x;
