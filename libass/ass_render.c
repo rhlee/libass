@@ -2204,9 +2204,9 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         FT_Outline *copy;
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = glyphs + i;
-            background = info->background;
             if(!i || info->linebreak)
             {
+                background = info->background;
                 if(background && background->n_points == 4)
                 {
                     info->hash_key.u.outline.end = GLYPH_START;
@@ -2223,6 +2223,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             } else if((text_info->length - i == 1) ||
               ((text_info->length - i > 2) && (info + 2)->linebreak))
             {
+                if(info->symbol == ' ' && i) info--;
+                background = info->background;
                 if(background && background->n_points == 4)
                 {
                     info->hash_key.u.outline.end = GLYPH_END;
