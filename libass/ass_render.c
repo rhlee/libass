@@ -1115,6 +1115,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
 
     fill_glyph_hash(priv, &key, info);
     val = ass_cache_get(priv->cache.outline_cache, &key);
+    //val = 0;
 
     if (!val) {
         OutlineHashValue v;
@@ -2171,28 +2172,42 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     if(render_priv->state.c[4])
     {
         FT_Outline *background;
+        BitmapHashValue *val;
+        FT_Outline *copy;
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = glyphs + i;
             background = info->background;
             if(!i || info->linebreak)
             {
-              if(background->n_points == 4)
-              {
-                background->points[0].x -= BACKGROUND_PADDING;
-                background->points[3].x -= BACKGROUND_PADDING;
-                // If the glyph is at the start of a line, change the cache key
-                info->hash_key.u.outline.end = GLYPH_START;
-              }
+                if(background->n_points == 4)
+                {
+                    info->hash_key.u.outline.end = GLYPH_START;
+                    val = ass_cache_get(render_priv->cache.bitmap_cache,
+                      &info->hash_key);
+                    if(!val)
+                    {
+                        outline_copy(render_priv->ftlibrary, background, &copy);
+                        info->background = copy;
+                        copy->points[0].x -= BACKGROUND_PADDING;
+                        copy->points[3].x -= BACKGROUND_PADDING;
+                    }
+                }
             } else if((text_info->length - i == 1) ||
               ((text_info->length - i > 2) && (info + 2)->linebreak))
             {
-              if(background->n_points == 4)
-              {
-                background->points[1].x += BACKGROUND_PADDING;
-                background->points[2].x += BACKGROUND_PADDING;
-                // If the glyph is at the end of a line, change the cache key
-                info->hash_key.u.outline.end = GLYPH_END;
-              }
+                if(background->n_points == 4)
+                {
+                    info->hash_key.u.outline.end = GLYPH_END;
+                    val = ass_cache_get(render_priv->cache.bitmap_cache,
+                      &info->hash_key);
+                    if(!val)
+                    {
+                        outline_copy(render_priv->ftlibrary, background, &copy);
+                        info->background = copy;
+                        copy->points[1].x += BACKGROUND_PADDING;
+                        copy->points[2].x += BACKGROUND_PADDING;
+                    }
+                }
             }
         }
     }
