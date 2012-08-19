@@ -99,6 +99,8 @@ START(glyph, glyph_hash_key)
     FTVECTOR(outline) // border width, 16.16
     GENERIC(unsigned, flags)    // glyph decoration flags
     GENERIC(unsigned, border_style)
+    // Not really background_colour, but a flag to undicate presence of one
+    GENERIC(unsigned, background_colour)
 END(GlyphHashKey)
 
 START(glyph_metrics, glyph_metrics_hash_key)

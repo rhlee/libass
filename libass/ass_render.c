@@ -1122,6 +1122,7 @@ fill_glyph_hash(ASS_Renderer *priv, OutlineHashKey *outline_key,
         key->outline.y = double_to_d16(info->border_y);
         key->flags = info->flags;
         key->border_style = priv->state.style->BorderStyle;
+        key->background_colour = info->c[4];
     }
 }
 
@@ -1143,7 +1144,6 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
 
     fill_glyph_hash(priv, &key, info);
     val = ass_cache_get(priv->cache.outline_cache, &key);
-    //val = 0;
 
     if (!val) {
         OutlineHashValue v;
