@@ -973,8 +973,10 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     double scale_x = render_priv->state.scale_x;
 
     // to avoid gaps
-    sx = FFMAX(64, sx);
-    sy = FFMAX(64, sy);
+    //sx = FFMAX(64, sx);
+    //sy = FFMAX(64, sy);
+    // Had to dial this down to avoid overlaps (and leave sy alone)
+    sx = FFMAX(12, sx);
 
     // Emulate the WTFish behavior of VSFilter, i.e. double-scale
     // the sizes of the opaque box.
@@ -991,35 +993,6 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
         { .x = adv + sx,    .y = asc + sy },
         { .x = adv + sx,    .y = -desc - sy },
         { .x = -sx,         .y = -desc - sy },
-    };
-
-    FT_Outline_New(render_priv->ftlibrary, 4, 1, ol);
-
-    ol->n_points = ol->n_contours = 0;
-    for (i = 0; i < 4; i++) {
-        ol->points[ol->n_points] = points[i];
-        ol->tags[ol->n_points++] = 1;
-    }
-    ol->contours[ol->n_contours++] = ol->n_points - 1;
-}
-
-/*
- * This is essentially the same as the above function, but scaling is ignored
- * and the FFMAX is adjusted to avoid overlaps.
- * Called specifically when BackgroundColour is set
- */
-static void draw_opaque_box_simple(ASS_Renderer *render_priv, int asc, int desc,
-                            FT_Outline *ol, FT_Vector advance)
-{
-    int i;
-    int adv = advance.x;
-    int padding = 16;
-
-    FT_Vector points[4] = {
-        { .x = 0,      .y = asc },
-        { .x = adv,    .y = asc },
-        { .x = adv,    .y = -desc - padding},
-        { .x = 0,      .y = -desc - padding},
     };
 
     FT_Outline_New(render_priv->ftlibrary, 4, 1, ol);
@@ -1226,7 +1199,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
             else
                 advance = info->advance;
 
-            draw_opaque_box_simple(priv, v.asc, v.desc, v.background, advance);
+            draw_opaque_box(priv, v.asc, v.desc, v.background, advance, 0, 0);
         }
 
         v.lib = priv->ftlibrary;
@@ -2002,13 +1975,21 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     pen.x = 0;
     pen.y = 0;
     int lineno = 1;
+    double scale_y = render_priv->state.scale_y;
     for (i = 0; i < text_info->length; i++) {
         GlyphInfo *info = glyphs + cmap[i];
         if (glyphs[i].linebreak) {
             pen.x = 0;
-            pen.y += double_to_d6(text_info->lines[lineno-1].desc);
-            pen.y += double_to_d6(text_info->lines[lineno].asc);
-            pen.y += double_to_d6(render_priv->settings.line_spacing);
+            if(glyphs->c[4])
+            {
+                pen.y += double_to_d6(text_info->lines[lineno-1].desc * scale_y);
+                pen.y += double_to_d6(text_info->lines[lineno].asc * scale_y);
+            }
+            else
+            {
+                pen.y += double_to_d6(text_info->lines[lineno-1].desc);
+                pen.y += double_to_d6(text_info->lines[lineno].asc);
+            }
             lineno++;
         }
         if (info->skip) continue;
