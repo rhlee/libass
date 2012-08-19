@@ -969,6 +969,8 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
 {
     int i;
     int adv = advance.x;
+    // The yoffset helps center the text
+    int yoffset = desc / 6;
     double scale_y = render_priv->state.scale_y;
     double scale_x = render_priv->state.scale_x;
 
@@ -989,10 +991,10 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     desc += asc * (scale_y - 1.0);
 
     FT_Vector points[4] = {
-        { .x = -sx,         .y = asc + sy },
-        { .x = adv + sx,    .y = asc + sy },
-        { .x = adv + sx,    .y = -desc - sy },
-        { .x = -sx,         .y = -desc - sy },
+        { .x = -sx,         .y = asc + sy - yoffset},
+        { .x = adv + sx,    .y = asc + sy - yoffset},
+        { .x = adv + sx,    .y = -desc - sy - yoffset},
+        { .x = -sx,         .y = -desc - sy - yoffset},
     };
 
     FT_Outline_New(render_priv->ftlibrary, 4, 1, ol);
