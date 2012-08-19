@@ -1215,7 +1215,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
                     double_to_d6(info->border_y * priv->border_scale));
         }
 
-        if(priv->state.c[4])
+        if(info->c[4])
         {
             FT_Vector advance;
 
@@ -1848,12 +1848,13 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         // Fill glyph information
         glyphs[text_info->length].symbol = code;
         glyphs[text_info->length].font = render_priv->state.font;
-        for (i = 0; i < 5; ++i) {
+        for (i = 0; i < 4; ++i) {
             uint32_t clr = render_priv->state.c[i];
             change_alpha(&clr,
                          mult_alpha(_a(clr), render_priv->state.fade), 1.);
             glyphs[text_info->length].c[i] = clr;
         }
+        glyphs[text_info->length].c[4] = render_priv->state.c[4];
         glyphs[text_info->length].effect_type = render_priv->state.effect_type;
         glyphs[text_info->length].effect_timing =
             render_priv->state.effect_timing;
@@ -2197,7 +2198,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
-    if(render_priv->state.c[4])
+    if(glyphs->c[4])
     {
         FT_Outline *background;
         BitmapHashValue *val;
