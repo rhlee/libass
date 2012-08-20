@@ -709,7 +709,6 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         blank_key.type = BITMAP_SIZE;
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
-        ass_msg(render_priv->library, 1, "bv: %p", blank_val);
         if(!blank_val)
         {
             BitmapHashValue v;
@@ -748,6 +747,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                     if ((background_colour & 0xff) > 0)
                         render_overlap(render_priv, &glyph_background,
                           &background);
+                    glyph_background->next = NULL;
                     ass_free_images(glyph_background);
                 }
                 info = info->next;
