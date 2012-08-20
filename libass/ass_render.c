@@ -720,7 +720,9 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
             blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
         }
         bm_b = blank_val->bm_b;
-        bg_tail = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm->stride, 0, 0, bg_colour);
+        bg_tail = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm_b->stride, 0, 0, bg_colour);
+        *tail = bg_tail;
+        tail = &bg_tail->next;
     }
 
     for (i = 0; i < text_info->length; ++i) {
