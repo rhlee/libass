@@ -697,6 +697,23 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **last_tail = 0;
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
+    
+    ASS_Image **bg_tail;
+    BitmapHashKey blank_key;
+    BitmapHashValue *blank_val;
+    memset(&blank_key, 0, sizeof(BitmapHashKey));
+    blank_key.type = BITMAP_SIZE;
+    
+    blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
+    ass_msg(render_priv->library, 1, "bv: %p", blank_val);
+    if(!blank_val)
+    {
+        BitmapHashValue v;
+        memset(&v, 0, sizeof(BitmapHashValue));
+        v.bm = alloc_bitmap(render_priv->settings.frame_width,
+          render_priv->settings.frame_height);
+        blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
+    }
 
     for (i = 0; i < text_info->length; ++i) {
         GlyphInfo *info = text_info->glyphs + i;
@@ -978,7 +995,7 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     //sx = FFMAX(64, sx);
     //sy = FFMAX(64, sy);
     // Had to dial this down to avoid overlaps (and leave sy alone)
-    sx = FFMAX(12, sx);
+    sx = FFMAX(64, sx);
 
     // Emulate the WTFish behavior of VSFilter, i.e. double-scale
     // the sizes of the opaque box.
@@ -2202,6 +2219,10 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
                         info->background = copy;
                         copy->points[0].x -= BACKGROUND_PADDING;
                         copy->points[3].x -= BACKGROUND_PADDING;
+                        /*copy->points[1].x += BACKGROUND_PADDING;
+                        copy->points[1].x += BACKGROUND_PADDING;
+                        copy->points[1].x += BACKGROUND_PADDING;
+                        copy->points[1].y += BACKGROUND_PADDING;*/
                     }
                 }
             } else if((text_info->length - i == 1) ||

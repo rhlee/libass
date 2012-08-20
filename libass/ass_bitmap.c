@@ -132,7 +132,7 @@ void ass_synth_done(ASS_SynthPriv *priv)
     free(priv);
 }
 
-static Bitmap *alloc_bitmap(int w, int h)
+Bitmap *alloc_bitmap(int w, int h)
 {
     Bitmap *bm;
     unsigned s = w; // XXX: alignment
