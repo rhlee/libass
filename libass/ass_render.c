@@ -698,21 +698,29 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
     
-    ASS_Image **bg_tail;
+    ASS_Image *bg_tail;
     BitmapHashKey blank_key;
     BitmapHashValue *blank_val;
-    memset(&blank_key, 0, sizeof(BitmapHashKey));
-    blank_key.type = BITMAP_SIZE;
+    Bitmap *bm_b;
+    uint32_t bg_colour;
     
-    blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
-    ass_msg(render_priv->library, 1, "bv: %p", blank_val);
-    if(!blank_val)
+    if(bg_colour = text_info->glyphs->c[4])
     {
-        BitmapHashValue v;
-        memset(&v, 0, sizeof(BitmapHashValue));
-        v.bm = alloc_bitmap(render_priv->settings.frame_width,
-          render_priv->settings.frame_height);
-        blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
+        memset(&blank_key, 0, sizeof(BitmapHashKey));
+        blank_key.type = BITMAP_SIZE;
+
+        blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
+        ass_msg(render_priv->library, 1, "bv: %p", blank_val);
+        if(!blank_val)
+        {
+            BitmapHashValue v;
+            memset(&v, 0, sizeof(BitmapHashValue));
+            v.bm_b = alloc_bitmap(render_priv->settings.frame_width,
+              render_priv->settings.frame_height);
+            blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
+        }
+        bm_b = blank_val->bm_b;
+        bg_tail = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm->stride, 0, 0, bg_colour);
     }
 
     for (i = 0; i < text_info->length; ++i) {
