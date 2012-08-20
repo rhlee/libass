@@ -698,14 +698,13 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
     
-    ASS_Image *bg_tail;
-    BitmapHashKey blank_key;
-    BitmapHashValue *blank_val;
-    Bitmap *bm_b;
     uint32_t bg_colour;
-    
     if(bg_colour = text_info->glyphs->c[4])
     {
+        ASS_Image *bg_tail;
+        BitmapHashKey blank_key;
+        BitmapHashValue *blank_val;
+        Bitmap *bm_b;
         memset(&blank_key, 0, sizeof(BitmapHashKey));
         blank_key.type = BITMAP_SIZE;
 
@@ -723,38 +722,38 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         bg_tail = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm_b->stride, 0, 0, bg_colour);
         *tail = bg_tail;
         tail = &bg_tail->next;
-    }
-
-    for (i = 0; i < text_info->length; ++i) {
-        GlyphInfo *info = text_info->glyphs + i;
-        if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_b
-            || info->skip)
-            continue;
-
-        while (info) {
-            if (!info->bm_b) {
-                info = info->next;
+        //move into
+        for (i = 0; i < text_info->length; ++i) {
+            GlyphInfo *info = text_info->glyphs + i;
+            if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_b
+                || info->skip)
                 continue;
+
+            while (info) {
+                if (!info->bm_b) {
+                    info = info->next;
+                    continue;
+                }
+
+                pen_x = dst_x + (info->pos.x >> 6);
+                pen_y = dst_y + (info->pos.y >> 6);
+                bm = info->bm_b;
+
+                if ((info->effect_type == EF_KARAOKE_KO)
+                        && (info->effect_timing <= (info->bbox.xMax >> 6))) {
+                    // do nothing
+                } else {
+                    here_tail = tail;
+                    tail =
+                        render_glyph(render_priv, bm, pen_x, pen_y, info->c[4],
+                                0, 1000000, tail);
+                    if (last_tail && tail != here_tail && ((info->c[4] & 0xff) > 0))
+                        render_overlap(render_priv, last_tail, here_tail);
+
+                    last_tail = here_tail;
+                }
+                info = info->next;
             }
-
-            pen_x = dst_x + (info->pos.x >> 6);
-            pen_y = dst_y + (info->pos.y >> 6);
-            bm = info->bm_b;
-
-            if ((info->effect_type == EF_KARAOKE_KO)
-                    && (info->effect_timing <= (info->bbox.xMax >> 6))) {
-                // do nothing
-            } else {
-                here_tail = tail;
-                tail =
-                    render_glyph(render_priv, bm, pen_x, pen_y, info->c[4],
-                            0, 1000000, tail);
-                if (last_tail && tail != here_tail && ((info->c[4] & 0xff) > 0))
-                    render_overlap(render_priv, last_tail, here_tail);
-
-                last_tail = here_tail;
-            }
-            info = info->next;
         }
     }
 
@@ -1003,7 +1002,7 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
 
     // to avoid gaps
     //sx = FFMAX(64, sx);
-    //sy = FFMAX(64, sy);
+    sy = FFMAX(64, sy);
     // Had to dial this down to avoid overlaps (and leave sy alone)
     sx = FFMAX(64, sx);
 
