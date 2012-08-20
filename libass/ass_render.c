@@ -698,11 +698,11 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
     
-    uint32_t bg_colour;
-    if((bg_colour = text_info->glyphs->c[4]))
+    uint32_t background_colour;
+    if((background_colour = text_info->glyphs->c[4]))
     {
-        ASS_Image *bg_head = 0;
-        ASS_Image *bg_temp;
+        ASS_Image *background = 0;
+        ASS_Image *glyph_background;
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
         memset(&blank_key, 0, sizeof(BitmapHashKey));
@@ -716,10 +716,12 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
             memset(&v, 0, sizeof(BitmapHashValue));
             v.bm_b = alloc_bitmap(render_priv->settings.frame_width,
               render_priv->settings.frame_height);
-            blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
+            blank_val =
+              ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
         }
         Bitmap *bm_b = blank_val->bm_b;
-        bg_head = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm_b->stride, 0, 0, bg_colour);
+        background = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h,
+          bm_b->stride, 0, 0, background_colour);
 
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;
@@ -741,25 +743,17 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                         && (info->effect_timing <= (info->bbox.xMax >> 6))) {
                     // do nothing
                 } else {
-                    here_tail = tail;
-                    //tail =
-                    //render_glyph(render_priv, bm, pen_x, pen_y, bg_colour,
-                                //0, 1000000, tail);
-                    //bg_tail =
-                        render_glyph(render_priv, bm, pen_x, pen_y, bg_colour,
-                                0, 1000000, &bg_temp);
-                    //if (last_tail && tail != here_tail && ((bg_colour & 0xff) > 0))
-                        //render_overlap(render_priv, last_tail, here_tail);
-                    if ((bg_colour & 0xff) > 0)
-                        render_overlap(render_priv, &bg_temp, &bg_head);
-
-                    last_tail = here_tail;
+                    render_glyph(render_priv, bm, pen_x, pen_y,
+                      background_colour, 0, 1000000, &glyph_background);
+                    if ((background_colour & 0xff) > 0)
+                        render_overlap(render_priv, &glyph_background,
+                          &background);
                 }
                 info = info->next;
             }
         }
-    *tail = bg_head;
-    tail = &bg_head->next;
+        *tail = background;
+        tail = &background->next;
     }
 
     last_tail = 0;
