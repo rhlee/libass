@@ -748,6 +748,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                     if ((background_colour & 0xff) > 0)
                         render_overlap(render_priv, &glyph_background,
                           &background);
+                    ass_free_images(glyph_background);
                 }
                 info = info->next;
             }
