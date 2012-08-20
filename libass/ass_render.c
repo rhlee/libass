@@ -703,10 +703,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     {
         ASS_Image *bg_head = 0;
         ASS_Image *bg_temp;
-        ASS_Image **bg_tail = &bg_head;
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
-        Bitmap *bm_b;
         memset(&blank_key, 0, sizeof(BitmapHashKey));
         blank_key.type = BITMAP_SIZE;
 
@@ -720,11 +718,9 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
               render_priv->settings.frame_height);
             blank_val = ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
         }
-        bm_b = blank_val->bm_b;
+        Bitmap *bm_b = blank_val->bm_b;
         bg_head = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h, bm_b->stride, 0, 0, bg_colour);
-        //*bg_tail = bg_head;
-        bg_tail = &bg_head->next;
-        //move into
+
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;
             if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_b
@@ -741,7 +737,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                 pen_y = dst_y + (info->pos.y >> 6);
                 bm = info->bm_b;
 
-                if ((info->effect_type == EF_KARAOKE_KO) //remove?
+                if ((info->effect_type == EF_KARAOKE_KO)
                         && (info->effect_timing <= (info->bbox.xMax >> 6))) {
                     // do nothing
                 } else {
