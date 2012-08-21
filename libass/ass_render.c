@@ -706,21 +706,32 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
         memset(&blank_key, 0, sizeof(BitmapHashKey));
+        //change this name
+        //change hashing?
         blank_key.type = BITMAP_SIZE;
+        
+        //messy explaination
+        GlyphInfo *first = text_info->glyphs;
+        int h_padding = first->bm->left - first->bm_b->left + 1;
+        int v_padding = first->bm->top - first->bm_b->top + 1;
+        int left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
+        int top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
+        int width = text_info->bbox->xMax - text_info->bbox->xMin + (2 * h_padding);
+        int height = text_info->bbox->yMax - text_info->bbox->yMin + (2 * v_padding);
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
+        //max!!!!!!
         if(!blank_val)
         {
             BitmapHashValue v;
             memset(&v, 0, sizeof(BitmapHashValue));
-            v.bm_b = alloc_bitmap(render_priv->settings.frame_width,
-              render_priv->settings.frame_height);
+            v.bm_b = alloc_bitmap(width, height);
             blank_val =
               ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
         }
         Bitmap *bm_b = blank_val->bm_b;
         background = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h,
-          bm_b->stride, 0, 0, background_colour);
+          bm_b->stride, left, top, background_colour);
 
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;
@@ -2275,6 +2286,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             info = info->next;
         }
     }
+    
+    text_info->bbox = &bbox;
 
     memset(event_images, 0, sizeof(*event_images));
     event_images->top = device_y - text_info->lines[0].asc;
