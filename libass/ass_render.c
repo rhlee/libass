@@ -706,16 +706,15 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
         SizeBitmapHashKey *key = &blank_key.u.size;
-        //remove this? + organize
-        memset(&blank_key, 0, sizeof(BitmapHashKey));
-        //change this name
-        //change hashing?
-        blank_key.type = BITMAP_BOX;
         
         //messy explaination
         GlyphInfo *first = text_info->glyphs;
         GlyphInfo *last = text_info->glyphs + text_info->length - 1;
         int lr_padding = first->bm->left - first->bm_b->left + 1;
+
+        // c: key
+        blank_key.type = BITMAP_BOX;
+        //max!!!
         key->left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
         key->top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
         key->width = text_info->bbox->xMax - text_info->bbox->xMin +
