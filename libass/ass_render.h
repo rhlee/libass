@@ -166,7 +166,8 @@ typedef struct {
     double height;
     int max_glyphs;
     int max_lines;
-    DBBox *bbox;
+    GlyphInfo *leftmost_glyph;
+    GlyphInfo *rightmost_glyph;
 } TextInfo;
 
 // Renderer state.

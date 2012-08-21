@@ -710,15 +710,16 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         //messy explaination
         GlyphInfo *first = text_info->glyphs;
         GlyphInfo *last = text_info->glyphs + text_info->length - 1;
-        int lr_padding = first->bm->left - first->bm_b->left + 1;
+        GlyphInfo *left = text_info->leftmost_glyph;
+        GlyphInfo *right = text_info->rightmost_glyph;
 
         // c: key
         blank_key.type = BITMAP_BOX;
         //max!!!
-        key->left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
+        key->left = dst_x + (left->pos.x >> 6) + left->bm_b->left;
         key->top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
-        key->width = text_info->bbox->xMax - text_info->bbox->xMin +
-          (2 * lr_padding);
+        key->width = (right->pos.x >> 6) + right->bm_b->left + right->bm_b->w - 
+          ((left->pos.x >> 6) + left->bm_b->left);
         key->height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
           first->bm_b->top - (first->pos.y >> 6);
 
@@ -900,8 +901,18 @@ static void compute_string_bbox(TextInfo *text, DBBox *bbox)
             while (info) {
                 double s = d6_to_double(info->pos.x);
                 double e = s + d6_to_double(info->advance.x);
-                bbox->xMin = FFMIN(bbox->xMin, s);
-                bbox->xMax = FFMAX(bbox->xMax, e);
+                // bbox->xMin = FFMIN(bbox->xMin, s);
+                if(s < bbox->xMin)
+                {
+                    bbox->xMin = s;
+                    text->leftmost_glyph = info;
+                }
+                // bbox->xMax = FFMAX(bbox->xMax, e);
+                if(e > bbox->xMax)
+                {
+                    bbox->xMax = e;
+                    text->rightmost_glyph = info;
+                }
                 info = info->next;
             }
         }
@@ -2289,8 +2300,6 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             info = info->next;
         }
     }
-    
-    text_info->bbox = &bbox;
 
     memset(event_images, 0, sizeof(*event_images));
     event_images->top = device_y - text_info->lines[0].asc;
