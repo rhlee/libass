@@ -712,12 +712,14 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         
         //messy explaination
         GlyphInfo *first = text_info->glyphs;
-        int h_padding = first->bm->left - first->bm_b->left + 1;
-        int v_padding = first->bm->top - first->bm_b->top + 1;
+        GlyphInfo *last = text_info->glyphs + text_info->length - 1;
+        int lr_padding = first->bm->left - first->bm_b->left + 1;
         int left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
         int top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
-        int width = text_info->bbox->xMax - text_info->bbox->xMin + (2 * h_padding);
-        int height = text_info->bbox->yMax - text_info->bbox->yMin + (2 * v_padding);
+        int width = text_info->bbox->xMax - text_info->bbox->xMin +
+          (2 * lr_padding);
+        int height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
+          first->bm_b->top - (first->pos.y >> 6);
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
         //max!!!!!!
