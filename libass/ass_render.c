@@ -1251,7 +1251,9 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
             else
                 advance = info->advance;
 
-            draw_opaque_box(priv, v.asc, v.desc, v.background, advance, 0, 0);
+            draw_opaque_box(priv, v.asc, v.desc, v.background, advance,
+                    double_to_d6(info->border_x * priv->border_scale),
+                    double_to_d6(info->border_y * priv->border_scale));
         }
 
         v.lib = priv->ftlibrary;
