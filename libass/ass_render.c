@@ -721,7 +721,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         key->width = (right->pos.x >> 6) + right->bm_b->left + right->bm_b->w - 
           ((left->pos.x >> 6) + left->bm_b->left);
         key->height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
-          first->bm_b->top - (first->pos.y >> 6);
+          (first->bm_b->top + (first->pos.y >> 6));
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
         //max!!!!!!
