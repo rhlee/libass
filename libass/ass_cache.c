@@ -83,6 +83,8 @@ static void bitmap_destruct(void *key, void *value)
         ass_free_bitmap(v->bm_o);
     if (v->bm_s)
         ass_free_bitmap(v->bm_s);
+    if (v->bm_b)
+        ass_free_bitmap(v->bm_s);
     if (k->type == BITMAP_CLIP)
         free(k->u.clip.text);
     free(key);
