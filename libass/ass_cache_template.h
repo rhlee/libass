@@ -86,6 +86,14 @@ START(clip_bitmap, clip_bitmap_hash_key)
     STRING(text)
 END(ClipMaskHashKey)
 
+// describe a suze bitmap
+START(size_bitmap, size_bitmap_hash_key)
+    GENERIC(int, top)
+    GENERIC(int, left)
+    GENERIC(int, width)
+    GENERIC(int, height)
+END(SizeBitmapHashKey)
+
 // describes an outline glyph
 START(glyph, glyph_hash_key)
     GENERIC(ASS_Font *, font)

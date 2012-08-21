@@ -705,20 +705,22 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         ASS_Image *glyph_background;
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
+        SizeBitmapHashKey *key = &blank_key.u.size;
+        //remove this? + organize
         memset(&blank_key, 0, sizeof(BitmapHashKey));
         //change this name
         //change hashing?
-        blank_key.type = BITMAP_SIZE;
+        blank_key.type = BITMAP_BOX;
         
         //messy explaination
         GlyphInfo *first = text_info->glyphs;
         GlyphInfo *last = text_info->glyphs + text_info->length - 1;
         int lr_padding = first->bm->left - first->bm_b->left + 1;
-        int left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
-        int top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
-        int width = text_info->bbox->xMax - text_info->bbox->xMin +
+        key->left = dst_x + (first->pos.x >> 6) + first->bm_b->left;
+        key->top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
+        key->width = text_info->bbox->xMax - text_info->bbox->xMin +
           (2 * lr_padding);
-        int height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
+        key->height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
           first->bm_b->top - (first->pos.y >> 6);
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
@@ -727,13 +729,13 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         {
             BitmapHashValue v;
             memset(&v, 0, sizeof(BitmapHashValue));
-            v.bm_b = alloc_bitmap(width, height);
+            v.bm_b = alloc_bitmap(key->width, key->height);
             blank_val =
               ass_cache_put(render_priv->cache.bitmap_cache, &blank_key, &v);
         }
         Bitmap *bm_b = blank_val->bm_b;
         background = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h,
-          bm_b->stride, left, top, background_colour);
+          bm_b->stride, key->left, key->top, background_colour);
 
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;

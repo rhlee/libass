@@ -81,11 +81,12 @@ typedef struct bitmap_hash_key {
     enum {
         BITMAP_OUTLINE,
         BITMAP_CLIP,
-        BITMAP_SIZE,
+        BITMAP_BOX,
     } type;
     union {
         OutlineBitmapHashKey outline;
         ClipMaskHashKey clip;
+        SizeBitmapHashKey size;
     } u;
 } BitmapHashKey;
 

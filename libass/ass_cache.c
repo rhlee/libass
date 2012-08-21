@@ -109,7 +109,7 @@ static unsigned bitmap_hash(void *key, size_t key_size)
     switch (k->type) {
         case BITMAP_OUTLINE: return outline_bitmap_hash(&k->u, key_size);
         case BITMAP_CLIP: return clip_bitmap_hash(&k->u, key_size);
-        case BITMAP_SIZE: return 1;
+        case BITMAP_BOX: return size_bitmap_hash(&k->u, key_size);
         default: return 0;
     }
 }
@@ -122,7 +122,7 @@ static unsigned bitmap_compare (void *a, void *b, size_t key_size)
     switch (ak->type) {
         case BITMAP_OUTLINE: return outline_bitmap_compare(&ak->u, &bk->u, key_size);
         case BITMAP_CLIP: return clip_bitmap_compare(&ak->u, &bk->u, key_size);
-        case BITMAP_SIZE: return 1;
+        case BITMAP_BOX: return size_bitmap_compare(&ak->u, &bk->u, key_size);
         default: return 0;
     }
 }
