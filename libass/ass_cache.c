@@ -84,7 +84,7 @@ static void bitmap_destruct(void *key, void *value)
     if (v->bm_s)
         ass_free_bitmap(v->bm_s);
     if (v->bm_b)
-        ass_free_bitmap(v->bm_s);
+        ass_free_bitmap(v->bm_b);
     if (k->type == BITMAP_CLIP)
         free(k->u.clip.text);
     free(key);
@@ -98,6 +98,8 @@ static size_t bitmap_size(void *value, size_t value_size)
         return val->bm_o->w * val->bm_o->h * 3;
     else if (val->bm)
         return val->bm->w * val->bm->h * 3;
+    else if (val->bm_b)
+        return val->bm_b->w * val->bm_b->h * 3;
     return 0;
 }
 
