@@ -708,8 +708,9 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         SizeBitmapHashKey *key = &blank_key.u.size;
         
         //messy explaination
-        GlyphInfo *first = text_info->glyphs;
-        GlyphInfo *last = text_info->glyphs + text_info->length - 1;
+        GlyphInfo *top = text_info->glyphs;
+        GlyphInfo *bottom = text_info->glyphs +
+          text_info->lines[text_info->n_lines - 1].offset;
         GlyphInfo *left = text_info->leftmost_glyph;
         GlyphInfo *right = text_info->rightmost_glyph;
 
@@ -717,11 +718,12 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         blank_key.type = BITMAP_BOX;
         //max!!!
         key->left = dst_x + (left->pos.x >> 6) + left->bm_b->left;
-        key->top = dst_y + (first->pos.y >> 6) + first->bm_b->top;
+        key->top = dst_y + (top->pos.y >> 6) + top->bm_b->top;
         key->width = (right->pos.x >> 6) + right->bm_b->left + right->bm_b->w - 
           ((left->pos.x >> 6) + left->bm_b->left);
-        key->height = last->bm_b->top + last->bm_b->h + (last->pos.y >> 6) -
-          (first->bm_b->top + (first->pos.y >> 6));
+        key->height =
+          bottom->bm_b->top + bottom->bm_b->h + (bottom->pos.y >> 6) -
+          (top->bm_b->top + (top->pos.y >> 6));
 
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
         //max!!!!!!
