@@ -78,6 +78,7 @@ START(outline_bitmap, outline_bitmap_hash_key)
     FTVECTOR(shadow_offset) // shadow subpixel shift
     // end is used to indicate if the cached bitmap is for a glyph
     // at the start or the end of line (used with BackgroundColour)
+    // The enums are GLYPH_START and END
     GENERIC(int, end)
 END(OutlineBitmapHashKey)
 
@@ -86,7 +87,7 @@ START(clip_bitmap, clip_bitmap_hash_key)
     STRING(text)
 END(ClipMaskHashKey)
 
-// describe a suze bitmap
+// describe a size bitmap
 START(size_bitmap, size_bitmap_hash_key)
     GENERIC(int, top)
     GENERIC(int, left)

@@ -715,7 +715,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         GlyphInfo *right = text_info->rightmost_glyph;
 
         // c: key
-        blank_key.type = BITMAP_BOX;
+        blank_key.type = BITMAP_SIZE;
         //max!!!
         key->left = dst_x + (left->pos.x >> 6) + left->bm_b->left;
         key->top = dst_y + (top->pos.y >> 6) + top->bm_b->top;

@@ -55,6 +55,8 @@ int outline_to_bitmap3(ASS_Library *library, ASS_SynthPriv *priv_blur,
 
 void ass_free_bitmap(Bitmap *bm);
 
+// Made this function externally accessible so that
+// a blank bitmap background could be created
 Bitmap *alloc_bitmap(int w, int h);
 
 #endif                          /* LIBASS_BITMAP_H */

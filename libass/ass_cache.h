@@ -81,7 +81,8 @@ typedef struct bitmap_hash_key {
     enum {
         BITMAP_OUTLINE,
         BITMAP_CLIP,
-        BITMAP_BOX,
+        // The SIZE hash key is basically the coordinates of the bitmap
+        BITMAP_SIZE,
     } type;
     union {
         OutlineBitmapHashKey outline;
