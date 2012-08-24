@@ -698,8 +698,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
     
-    uint32_t background_colour;
-    if((background_colour = text_info->glyphs->c[4]))
+    if(text_info->glyphs->background_colour)
     {
         ASS_Image *background = 0;
         ASS_Image *glyph_background;
@@ -737,7 +736,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         }
         Bitmap *bm_b = blank_val->bm_b;
         background = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h,
-          bm_b->stride, key->left, key->top, background_colour);
+          bm_b->stride, key->left, key->top, text_info->glyphs->background_colour);
 
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;
@@ -760,8 +759,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                     // do nothing
                 } else {
                     render_glyph(render_priv, bm, pen_x, pen_y,
-                      background_colour, 0, 1000000, &glyph_background);
-                    if ((background_colour & 0xff) > 0)
+                      info->background_colour, 0, 1000000, &glyph_background);
+                    if ((info->background_colour & 0xff) > 0)
                         render_overlap(render_priv, &glyph_background,
                           &background);
                     glyph_background->next = NULL;
@@ -1152,7 +1151,7 @@ fill_glyph_hash(ASS_Renderer *priv, OutlineHashKey *outline_key,
         key->outline.y = double_to_d16(info->border_y);
         key->flags = info->flags;
         key->border_style = priv->state.style->BorderStyle;
-        key->background_colour = info->c[4];
+        key->background_colour = info->background_colour;
     }
 }
 
@@ -1245,7 +1244,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
                     double_to_d6(info->border_y * priv->border_scale));
         }
 
-        if(info->c[4])
+        if(info->background_colour)
         {
             FT_Vector advance;
 
@@ -1887,6 +1886,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             glyphs[text_info->length].c[i] = clr;
         }
         glyphs[text_info->length].c[4] = render_priv->state.c[4];
+        glyphs[text_info->length].background_colour =
+          glyphs[text_info->length].c[4];
         glyphs[text_info->length].effect_type = render_priv->state.effect_type;
         glyphs[text_info->length].effect_timing =
             render_priv->state.effect_timing;
@@ -2039,7 +2040,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         GlyphInfo *info = glyphs + cmap[i];
         if (glyphs[i].linebreak) {
             pen.x = 0;
-            if(glyphs->c[4])
+            if(glyphs->background_colour)
             {
                 pen.y += double_to_d6(text_info->lines[lineno-1].desc * scale_y);
                 pen.y += double_to_d6(text_info->lines[lineno].asc * scale_y);
@@ -2238,7 +2239,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
-    if(glyphs->c[4])
+    if(glyphs->background_colour)
     {
         FT_Outline *background;
         BitmapHashValue *val;

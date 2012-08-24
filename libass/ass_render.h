@@ -123,6 +123,7 @@ typedef struct glyph_info {
     FT_Vector offset;
     char linebreak;             // the first (leading) glyph of some line ?
     uint32_t c[5];              // colors
+    uint32_t background_colour; // a copy of c[4] from above for readability
     FT_Vector advance;          // 26.6
     FT_Vector cluster_advance;
     Effect effect_type;
