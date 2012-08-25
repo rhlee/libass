@@ -2052,16 +2052,9 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         GlyphInfo *info = glyphs + cmap[i];
         if (glyphs[i].linebreak) {
             pen.x = 0;
-            if(glyphs->background_colour)
-            {
-                pen.y += double_to_d6(text_info->lines[lineno-1].desc * scale_y);
-                pen.y += double_to_d6(text_info->lines[lineno].asc * scale_y);
-            }
-            else
-            {
-                pen.y += double_to_d6(text_info->lines[lineno-1].desc);
-                pen.y += double_to_d6(text_info->lines[lineno].asc);
-            }
+            pen.y += double_to_d6(text_info->lines[lineno-1].desc);
+            pen.y += double_to_d6(text_info->lines[lineno].asc);
+            pen.y += double_to_d6(render_priv->settings.line_spacing);
             lineno++;
         }
         if (info->skip) continue;
