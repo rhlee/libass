@@ -698,24 +698,30 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     ASS_Image **here_tail = 0;
     TextInfo *text_info = &render_priv->text_info;
     
+    // The way background colour rendering works is that all background_colour
+    // bitmaps are render_overlap'd onto one big bitmap. If the bitmaps are only
+    // overlapped with the previous one, it will not take into account overlaps
+    // on seperate lines.
     if(text_info->glyphs->background_colour)
     {
+        // the main background image ever glyph_background is render_overlap'd to
         ASS_Image *background = 0;
         ASS_Image *glyph_background;
+        // The blank bitmap is cached so that render_overlap has a bitmap to cache
+        // againt. As this is a blank bitmap, the position and size are used as keys
         BitmapHashKey blank_key;
         BitmapHashValue *blank_val;
         SizeBitmapHashKey *key = &blank_key.u.size;
         
-        //messy explaination
+        // The blank bitmap has to be at least the same size as all the other bitmaps
+        // laid out and put together. However if it is too big, it will slow down the
+        // image blending. So the glyphs on the edges are used as the rectangle.
         GlyphInfo *top = text_info->glyphs;
         GlyphInfo *bottom = text_info->glyphs +
           text_info->lines[text_info->n_lines - 1].offset;
         GlyphInfo *left = text_info->leftmost_glyph;
         GlyphInfo *right = text_info->rightmost_glyph;
 
-        // c: key
-        blank_key.type = BITMAP_SIZE;
-        //max!!!
         key->left = dst_x + (left->pos.x >> 6) + left->bm_b->left;
         key->top = dst_y + (top->pos.y >> 6) + top->bm_b->top;
         key->width = (right->pos.x >> 6) + right->bm_b->left + right->bm_b->w - 
@@ -724,10 +730,11 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
           bottom->bm_b->top + bottom->bm_b->h + (bottom->pos.y >> 6) -
           (top->bm_b->top + (top->pos.y >> 6));
 
+        blank_key.type = BITMAP_SIZE;
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
-        //max!!!!!!
+
         if(!blank_val)
-        {
+        {   // Alloc bitmap if not cache
             BitmapHashValue v;
             memset(&v, 0, sizeof(BitmapHashValue));
             v.bm_b = alloc_bitmap(key->width, key->height);
@@ -738,6 +745,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         background = my_draw_bitmap(bm_b->buffer, bm_b->w, bm_b->h,
           bm_b->stride, key->left, key->top, text_info->glyphs->background_colour);
 
+        // Loop through each bitmap glyph rendering it and overlapping it with
+        // the background bitmap
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = text_info->glyphs + i;
             if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_b
@@ -900,6 +909,8 @@ static void compute_string_bbox(TextInfo *text, DBBox *bbox)
             GlyphInfo *info = text->glyphs + i;
             if (info->skip) continue;
             while (info) {
+                // In addition to calculating the bbox, the left and right-most
+                // glyphs are calculated for the background_colour bitmap
                 double s = d6_to_double(info->pos.x);
                 double e = s + d6_to_double(info->advance.x);
                 // bbox->xMin = FFMIN(bbox->xMin, s);
@@ -1024,15 +1035,11 @@ static void draw_opaque_box(ASS_Renderer *render_priv, int asc, int desc,
     double scale_y = render_priv->state.scale_y;
     double scale_x = render_priv->state.scale_x;
     // The y_offset helps center the text
-    //magin muner
-    int y_offset = desc / 6;
-    //y_offset = 0;
+    int y_offset = desc * Y_OFFSET_MULTIPLIER;
 
     // to avoid gaps
-    //sx = FFMAX(64, sx);
-    sy = FFMAX(64, sy);
-    // Had to dial this down to avoid overlaps (and leave sy alone)
     sx = FFMAX(64, sx);
+    sy = FFMAX(64, sy);
 
     // Emulate the WTFish behavior of VSFilter, i.e. double-scale
     // the sizes of the opaque box.
@@ -1245,7 +1252,7 @@ get_outline_glyph(ASS_Renderer *priv, GlyphInfo *info)
         }
 
         if(info->background_colour)
-        {
+        {   // Draw the background colour box if present
             FT_Vector advance;
 
             v.background = calloc(1, sizeof(FT_Outline));
