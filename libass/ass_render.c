@@ -769,6 +769,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                         && (info->effect_timing <= (info->bbox.xMax >> 6))) {
                     // do nothing
                 } else {
+                    // The background images are put in a seperate linked list
+                    // from the main one
                     glyph_background_here_tail = glyph_background_tail;
                     glyph_background_tail = render_glyph(render_priv, bm,
                       pen_x, pen_y, info->background_colour, 0, 1000000,
@@ -780,6 +782,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                 info = info->next;
             }
         }
+        // As the background images are not put in the main image list, they
+        // will not be freed. So it must be done here.
         (*glyph_background_here_tail)->next = NULL;
         ass_free_images(glyph_background_head);
         
@@ -1897,6 +1901,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
                          mult_alpha(_a(clr), render_priv->state.fade), 1.);
             glyphs[text_info->length].c[i] = clr;
         }
+        // This is outside the above loop as background colour is not faded,
+        // will cause problems if put in
         glyphs[text_info->length].c[4] = render_priv->state.c[4];
         glyphs[text_info->length].background_colour =
           glyphs[text_info->length].c[4];
@@ -2244,6 +2250,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         }
     }
 
+    // Pads the start and end of lines for background images
+    // The padded images are cached as so not to break the caching chain
     if(glyphs->background_colour)
     {
         FT_Outline *background;
@@ -2265,15 +2273,12 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
                         info->background = copy;
                         copy->points[0].x -= BACKGROUND_PADDING;
                         copy->points[3].x -= BACKGROUND_PADDING;
-                        /*copy->points[1].x += BACKGROUND_PADDING;
-                        copy->points[1].x += BACKGROUND_PADDING;
-                        copy->points[1].x += BACKGROUND_PADDING;
-                        copy->points[1].y += BACKGROUND_PADDING;*/
                     }
                 }
             } else if((text_info->length - i == 1) ||
               ((text_info->length - i > 2) && (info + 2)->linebreak))
             {
+                // If the last glyph is a space, pad the previous glyph
                 if(info->symbol == ' ' && i) info--;
                 background = info->background;
                 if(background && background->n_points == 4)

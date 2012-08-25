@@ -42,11 +42,13 @@ typedef struct ass_shaper ASS_Shaper;
 #define GLYPH_CACHE_MAX 1000
 #define BITMAP_CACHE_MAX_SIZE 30 * 1048576
 
+// Background definitions
 #define BACKGROUND_PADDING 512
 #define Y_OFFSET_MULTIPLIER 1 / 6
 
 #define GLYPH_START 1
 #define GLYPH_END 2
+// End of background definitions
 
 #define PARSED_FADE (1<<0)
 #define PARSED_A    (1<<1)
