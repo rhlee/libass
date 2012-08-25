@@ -706,7 +706,9 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     {
         // the main background image ever glyph_background is render_overlap'd to
         ASS_Image *background = 0;
-        ASS_Image *glyph_background;
+        ASS_Image *glyph_background_head;
+        ASS_Image **glyph_background_tail = &glyph_background_head;
+        ASS_Image **glyph_background_here_tail = 0;
         // The blank bitmap is cached so that render_overlap has a bitmap to cache
         // againt. As this is a blank bitmap, the position and size are used as keys
         BitmapHashKey blank_key;
@@ -767,17 +769,20 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
                         && (info->effect_timing <= (info->bbox.xMax >> 6))) {
                     // do nothing
                 } else {
-                    render_glyph(render_priv, bm, pen_x, pen_y,
-                      info->background_colour, 0, 1000000, &glyph_background);
+                    glyph_background_here_tail = glyph_background_tail;
+                    glyph_background_tail = render_glyph(render_priv, bm,
+                      pen_x, pen_y, info->background_colour, 0, 1000000,
+                        glyph_background_tail);
                     if ((info->background_colour & 0xff) > 0)
-                        render_overlap(render_priv, &glyph_background,
+                        render_overlap(render_priv, glyph_background_here_tail,
                           &background);
-                    glyph_background->next = NULL;
-                    ass_free_images(glyph_background);
                 }
                 info = info->next;
             }
         }
+        (*glyph_background_here_tail)->next = NULL;
+        ass_free_images(glyph_background_head);
+        
         *tail = background;
         tail = &background->next;
     }
