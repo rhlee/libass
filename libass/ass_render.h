@@ -172,8 +172,10 @@ typedef struct {
     double height;
     int max_glyphs;
     int max_lines;
+    // These are the outermost glyphs used to calculate the background bitmap size
     GlyphInfo *leftmost_glyph;
     GlyphInfo *rightmost_glyph;
+    GlyphInfo *first_visible_glyph;
 } TextInfo;
 
 // Renderer state.

@@ -718,7 +718,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         // The blank bitmap has to be at least the same size as all the other bitmaps
         // laid out and put together. However if it is too big, it will slow down the
         // image blending. So the glyphs on the edges are used as the rectangle.
-        GlyphInfo *top = text_info->glyphs;
+        GlyphInfo *top = text_info->first_visible_glyph;
         GlyphInfo *bottom = text_info->glyphs +
           text_info->lines[text_info->n_lines - 1].offset;
         GlyphInfo *left = text_info->leftmost_glyph;
@@ -2259,6 +2259,10 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         FT_Outline *copy;
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = glyphs + i;
+            // first_visible_glyph is the first non-space glyph whose top
+            // edge will represent the top edge of the background bitmap
+            if(!text_info->first_visible_glyph && (info->symbol != ' '))
+              text_info->first_visible_glyph = info;
             if(!i || info->linebreak)
             {
                 background = info->background;
