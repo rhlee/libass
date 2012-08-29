@@ -176,6 +176,7 @@ typedef struct {
     GlyphInfo *leftmost_glyph;
     GlyphInfo *rightmost_glyph;
     GlyphInfo *first_visible_glyph;
+    GlyphInfo *last_visible_glyph;
 } TextInfo;
 
 // Renderer state.

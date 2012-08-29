@@ -719,8 +719,7 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         // laid out and put together. However if it is too big, it will slow down the
         // image blending. So the glyphs on the edges are used as the rectangle.
         GlyphInfo *top = text_info->first_visible_glyph;
-        GlyphInfo *bottom = text_info->glyphs +
-          text_info->lines[text_info->n_lines - 1].offset;
+        GlyphInfo *bottom = text_info->last_visible_glyph;
         GlyphInfo *left = text_info->leftmost_glyph;
         GlyphInfo *right = text_info->rightmost_glyph;
 
@@ -2264,6 +2263,9 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             // edge will represent the top edge of the background bitmap
             if(!text_info->first_visible_glyph && (info->symbol != ' '))
               text_info->first_visible_glyph = info;
+            // same for bottom edge
+            if(info->symbol != ' ')
+              text_info->last_visible_glyph = info;
             if(!i || info->linebreak)
             {
                 background = info->background;
