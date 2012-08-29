@@ -2257,6 +2257,7 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
         FT_Outline *background;
         BitmapHashValue *val;
         FT_Outline *copy;
+        text_info->first_visible_glyph = NULL;
         for (i = 0; i < text_info->length; ++i) {
             GlyphInfo *info = glyphs + i;
             // first_visible_glyph is the first non-space glyph whose top
