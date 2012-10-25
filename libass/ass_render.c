@@ -718,18 +718,21 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         // The blank bitmap has to be at least the same size as all the other bitmaps
         // laid out and put together. However if it is too big, it will slow down the
         // image blending. So the glyphs on the edges are used as the rectangle.
-        GlyphInfo *top = text_info->first_visible_glyph;
-        GlyphInfo *bottom = text_info->last_visible_glyph;
-        GlyphInfo *left = text_info->leftmost_glyph;
-        GlyphInfo *right = text_info->rightmost_glyph;
+        GlyphInfo *top_gi = text_info->first_visible_glyph;
+        GlyphInfo *bottom_gi = text_info->last_visible_glyph;
+        GlyphInfo *left_gi = text_info->leftmost_glyph;
+        GlyphInfo *right_gi = text_info->rightmost_glyph;
 
-        key->left = dst_x + (left->pos.x >> 6) + left->bm_b->left;
-        key->top = dst_y + (top->pos.y >> 6) + top->bm_b->top;
-        key->width = (right->pos.x >> 6) + right->bm_b->left + right->bm_b->w - 
-          ((left->pos.x >> 6) + left->bm_b->left);
+        key->left = dst_x + (left_gi->pos.x >> 6) + left_gi->bm_b->left;
+        key->top = dst_y + (top_gi->pos.y >> 6) + top_gi->bm_b->top;
+        key->width = (right_gi->pos.x >> 6) + right_gi->bm_b->left + right_gi->bm_b->w - 
+          ((left_gi->pos.x >> 6) + left_gi->bm_b->left);
         key->height =
-          bottom->bm_b->top + bottom->bm_b->h + (bottom->pos.y >> 6) -
-          (top->bm_b->top + (top->pos.y >> 6));
+          bottom_gi->bm_b->top + bottom_gi->bm_b->h + (bottom_gi->pos.y >> 6) -
+          (top_gi->bm_b->top + (top_gi->pos.y >> 6));
+        printf("bg bitmap: (%d, %d) %dx%d\n",
+          key->left, key->top, key->width, key->height);
+        printf("f: %dx%d\n", render_priv->width, render_priv->height);
 
         blank_key.type = BITMAP_SIZE;
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
