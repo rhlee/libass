@@ -722,17 +722,20 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         GlyphInfo *bottom_gi = text_info->last_visible_glyph;
         GlyphInfo *left_gi = text_info->leftmost_glyph;
         GlyphInfo *right_gi = text_info->rightmost_glyph;
-
-        key->left = dst_x + (left_gi->pos.x >> 6) + left_gi->bm_b->left;
-        key->top = dst_y + (top_gi->pos.y >> 6) + top_gi->bm_b->top;
-        key->width = (right_gi->pos.x >> 6) + right_gi->bm_b->left + right_gi->bm_b->w - 
+        
+        int left = dst_x + (left_gi->pos.x >> 6) + left_gi->bm_b->left;
+        int top = dst_y + (top_gi->pos.y >> 6) + top_gi->bm_b->top;
+        int width = (right_gi->pos.x >> 6) + right_gi->bm_b->left + right_gi->bm_b->w - 
           ((left_gi->pos.x >> 6) + left_gi->bm_b->left);
-        key->height =
+        int height =
           bottom_gi->bm_b->top + bottom_gi->bm_b->h + (bottom_gi->pos.y >> 6) -
           (top_gi->bm_b->top + (top_gi->pos.y >> 6));
-        printf("bg bitmap: (%d, %d) %dx%d\n",
-          key->left, key->top, key->width, key->height);
-        printf("f: %dx%d\n", render_priv->width, render_priv->height);
+        key->left = (left > 0) ? left : 0;
+        key->top = (top > 0) ? top : 0;
+        key->width =
+          ((left + width) < render_priv->width) ? width : render_priv->width - left;
+        key->height =
+          ((top + height) < render_priv->height) ? height : render_priv->height - top;
 
         blank_key.type = BITMAP_SIZE;
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);
