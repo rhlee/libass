@@ -793,7 +793,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         }
         // As the background images are not put in the main image list, they
         // will not be freed. So it must be done here.
-        if(*glyph_background_here_tail != NULL)
+        if((*glyph_background_here_tail != NULL) &&
+          (glyph_background_here_tail != glyph_background_tail))
         {
           (*glyph_background_here_tail)->next = NULL;
           ass_free_images(glyph_background_head);
