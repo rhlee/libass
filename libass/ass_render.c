@@ -734,8 +734,10 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
         key->top = (top > 0) ? top : 0;
         key->width =
           ((left + width) < render_priv->width) ? width : render_priv->width - left;
-        key->height =
+        height =
           ((top + height) < render_priv->height) ? height : render_priv->height - top;
+        key->height = (height < (render_priv->height / MAX_BACKGROUND_Y_PROPORTION)) ?
+          height : render_priv->height / MAX_BACKGROUND_Y_PROPORTION;
 
         blank_key.type = BITMAP_SIZE;
         blank_val = ass_cache_get(render_priv->cache.bitmap_cache, &blank_key);

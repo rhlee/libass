@@ -45,6 +45,7 @@ typedef struct ass_shaper ASS_Shaper;
 // Background definitions
 #define BACKGROUND_PADDING 512
 #define Y_OFFSET_MULTIPLIER 1 / 6
+#define MAX_BACKGROUND_Y_PROPORTION 3;
 
 #define GLYPH_START 1
 #define GLYPH_END 2
