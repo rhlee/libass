@@ -2272,7 +2272,8 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
             GlyphInfo *info = glyphs + i;
             // first_visible_glyph is the first non-space glyph whose top
             // edge will represent the top edge of the background bitmap
-            if(!text_info->first_visible_glyph && (info->symbol != ' '))
+            if(!text_info->first_visible_glyph
+              && (info->symbol != ' ') && (info->symbol != '\n'))
               text_info->first_visible_glyph = info;
             // same for bottom edge
             if((info->symbol != ' ') && (info->symbol != '\n'))
