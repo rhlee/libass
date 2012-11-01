@@ -942,7 +942,7 @@ static void compute_string_bbox(TextInfo *text, DBBox *bbox)
                 if(e > bbox->xMax)
                 {
                     bbox->xMax = e;
-                    text->rightmost_glyph = info;
+                    if(info->symbol != '\n') text->rightmost_glyph = info;
                 }
                 info = info->next;
             }
