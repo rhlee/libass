@@ -702,7 +702,8 @@ static ASS_Image *render_text(ASS_Renderer *render_priv, int dst_x, int dst_y)
     // bitmaps are render_overlap'd onto one big bitmap. If the bitmaps are only
     // overlapped with the previous one, it will not take into account overlaps
     // on seperate lines.
-    if(text_info->glyphs->background_colour)
+    if(text_info->glyphs->background_colour
+      && text_info->leftmost_glyph && text_info->leftmost_glyph->bm_b)
     {
         // the main background image ever glyph_background is render_overlap'd to
         ASS_Image *background = 0;
